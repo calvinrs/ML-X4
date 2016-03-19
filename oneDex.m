@@ -1,5 +1,7 @@
 function A = oneDex(X, numLabels)
-    
+% %note: can do this more easily with logical arrays
+% a = 1:numLabels;
+% A = A == x
 %size(X,2) must equal one
 A = zeros(size(X,1),numLabels);
 

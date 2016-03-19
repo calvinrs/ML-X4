@@ -112,6 +112,42 @@ J = ( (-1 / m) * (sumTotal) ) + ((lambda/(2*m)) * sumSqThetas);
 
 % =========================================================================
 
+%implement backpropogation algorithm for each training example
+
+for t = 1:m
+    
+    % #1: Forward propigation to get output aL 
+    % use vectors to match lecture notes
+    a1 = [1;X(t,:)'];
+    z2 = Theta1 * a1;
+    a2 = [1; sigmoid(z2)];
+    
+    %now repeat for next layer    
+    z3 = Theta2 * a2;
+    a3 = sigmoid(z3); % no bias in last layer
+    
+    % #2: compute dL using actual observation
+    delta_3 = a3 - indexY(t,:)';
+    
+    % #3: use sigmoid gradient function to get d at the previous layer
+    delta_2 = (Theta2' * delta_3) .* [0; sigmoidGradient(z2)];
+    delta_2 = delta_2(2:end);
+    
+    % #4: add this to the accumulated delta values
+    dt2  = delta_3 * a2';
+    dt1  = delta_2 * a1';
+    
+    %summations
+    Theta2_grad = Theta2_grad + dt2;
+    Theta1_grad = Theta1_grad + dt1;
+    
+end
+
+% #5: final gradient divided by m
+Theta1_grad = (1/m) * Theta1_grad;
+Theta2_grad = (1/m) * Theta2_grad;
+
+% "unroll" the gradients into a single vector
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 

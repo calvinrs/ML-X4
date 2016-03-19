@@ -81,30 +81,31 @@ a3 = sigmoid(z3);
 
 %To evaluate the hypothsis one-for-all result at layer 3, take the index of the max
 %probalitity found
-[maxVal, maxIndex] =  max (a3, [], 2);
-
-H = maxIndex;
+% [maxVal, maxIndex] =  max (a3, [], 2);
+% 
+% H = maxIndex;
 
 %convert H and y to index of logical values
-indexH = oneDex(H,num_labels);
+% indexH = oneDex(H,num_labels);
 indexY = oneDex(y,num_labels);
 
 %Now calc the hypothesis function for all observed Y, for all ouput units K;
 
 %double summation
 sumTotal = 0;
-
 for n = 1:m
     for k = 1:num_labels
-        sumTotal = (indexY(n,k) * log(a3(n,k))) + ((1 - indexY(n,k)) * log(1- a3(n,k)));
+        sumTotal = sumTotal + (indexY(n,k) * log(a3(n,k))) + ((1 - indexY(n,k)) * log(1- a3(n,k)));
     end
 end
 
-J = ( (-1 / m) * (sumTotal) );
+%now with regularisation term!
+unbiasedTheta1 = Theta1(:,2:end); % as theta(0) = 0; don't regularise bias term
+unbiasedTheta2 = Theta2(:,2:end);
+unbiasedThetas = [unbiasedTheta1(:);unbiasedTheta2(:)];
+sumSqThetas = unbiasedThetas' * unbiasedThetas;
 
-
-
-
+J = ( (-1 / m) * (sumTotal) ) + ((lambda/(2*m)) * sumSqThetas);
 
 
 % -------------------------------------------------------------
@@ -112,6 +113,48 @@ J = ( (-1 / m) * (sumTotal) );
 % =========================================================================
 
 % Unroll gradients
+grad = [Theta1_grad(:) ; Theta2_grad(:)];
+
+%implement backpropogation algorithm for each training example
+Delta1 = 0;
+Delta2 = 0;
+for t = 1:m
+    
+    % #1: Forward propigation to get output aL 
+    % use vectors to match lecture notes
+    a1 = [1;X(1,:)'];
+    z2 = Theta1 * a1;
+    a2 = [1; sigmoid(z2)];
+    
+    %now repeat for next layer    
+    z3 = Theta2 * a2;
+    a3 = sigmoid(z3); % no bias in last layer
+    
+    % #2: compute dL using actual observation
+    d3 = a3 - indexY(t,:)';
+    
+    % #3: use sigmoid gradient function to get d at the previous layer
+    d2 = (Theta2' * d3) .* [0; sigmoidGradient(z2)];
+    d2 = d2(2:end);
+    
+    % #4: add this to the accumulated delta values
+    delta2 = d3 * a2';
+    delta1 = d2 * a1';
+    
+    %summations
+    Theta2_grad = Theta2_grad + delta2;
+    Theta1_grad = Theta1_grad + delta1;
+    
+end
+
+Theta1_grad
+Theta2_grad
+
+% #5: final gradient divided by m
+Theta1_grad = (1/m) * Theta1_grad;
+Theta2_grad = (1/m) * Theta2_grad;
+
+% "unroll" the gradients into a single vector
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
 
