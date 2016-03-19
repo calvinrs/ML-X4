@@ -99,9 +99,10 @@ for n = 1:m
     end
 end
 
-%now with regularisation term!
-unbiasedTheta1 = Theta1(:,2:end); % as theta(0) = 0; don't regularise bias term
-unbiasedTheta2 = Theta2(:,2:end);
+%now with regularisation term 
+%- set to zero rather than removing so we can add to the deltas 
+unbiasedTheta1 = [zeros(size(Theta1,1),1),Theta1(:,2:end)]; % as theta(0) = 0; don't regularise bias term
+unbiasedTheta2 = [zeros(size(Theta2,1),1),Theta2(:,2:end)];
 unbiasedThetas = [unbiasedTheta1(:);unbiasedTheta2(:)];
 sumSqThetas = unbiasedThetas' * unbiasedThetas;
 
@@ -144,8 +145,10 @@ for t = 1:m
 end
 
 % #5: final gradient divided by m
-Theta1_grad = (1/m) * Theta1_grad;
-Theta2_grad = (1/m) * Theta2_grad;
+Theta1_grad = (1/m) * Theta1_grad + (lambda/m) * unbiasedTheta1;
+Theta2_grad = (1/m) * Theta2_grad + (lambda/m) * unbiasedTheta2;
+
+% Regularised gradient
 
 % "unroll" the gradients into a single vector
 % Unroll gradients
