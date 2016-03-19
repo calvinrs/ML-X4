@@ -81,30 +81,31 @@ a3 = sigmoid(z3);
 
 %To evaluate the hypothsis one-for-all result at layer 3, take the index of the max
 %probalitity found
-[maxVal, maxIndex] =  max (a3, [], 2);
-
-H = maxIndex;
+% [maxVal, maxIndex] =  max (a3, [], 2);
+% 
+% H = maxIndex;
 
 %convert H and y to index of logical values
-indexH = oneDex(H,num_labels);
+% indexH = oneDex(H,num_labels);
 indexY = oneDex(y,num_labels);
 
 %Now calc the hypothesis function for all observed Y, for all ouput units K;
 
 %double summation
 sumTotal = 0;
-a3
 for n = 1:m
     for k = 1:num_labels
         sumTotal = sumTotal + (indexY(n,k) * log(a3(n,k))) + ((1 - indexY(n,k)) * log(1- a3(n,k)));
     end
 end
 
-J = ( (-1 / m) * (sumTotal) );
+%now with regularisation term!
+unbiasedTheta1 = Theta1(:,2:end); % as theta(0) = 0; don't regularise bias term
+unbiasedTheta2 = Theta2(:,2:end);
+unbiasedThetas = [unbiasedTheta1(:);unbiasedTheta2(:)];
+sumSqThetas = unbiasedThetas' * unbiasedThetas;
 
-
-
-
+J = ( (-1 / m) * (sumTotal) ) + ((lambda/(2*m)) * sumSqThetas);
 
 
 % -------------------------------------------------------------
